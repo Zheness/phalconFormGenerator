@@ -5,6 +5,12 @@ class IndexController extends ControllerBase
     const NL = "\n";
     const TAB = "\t";
 
+    public function tmpAction(){
+    	$form = new UsersForm();
+    	$form->setFields();
+    	$this->view->form = $form;
+    }
+
     public function indexAction()
     {
         $connection = new \Phalcon\Db\Adapter\Pdo\Mysql($this->config->database->toArray());
@@ -12,12 +18,12 @@ class IndexController extends ControllerBase
         foreach ($tables as $table) {
 
             $tablename = \Phalcon\Text::camelize($table);
-        	$fd = fopen("{$this->config->application->formsDir}/{$tablename}.php", "w");
+        	$fd = fopen("{$this->config->application->formsDir}/{$tablename}Form.php", "w");
         	
         	fwrite($fd, "<?php" . self::NL . self::NL);
 
             // Begin class
-            fwrite($fd, "class {$tablename}Form extends \\Phalcon\\Forms\\Form {" . self::NL);
+            fwrite($fd, "class {$tablename}Form extends phalconCSSFormNone {" . self::NL);
 
 
             $columns = $connection->describeColumns($table);
