@@ -27,7 +27,7 @@ class IndexController extends ControllerBase
         	fwrite($fd, "<?php" . self::NL . self::NL);
 
             // Begin class
-            fwrite($fd, "class {$tablename}Form extends phalconCSSFormBootstrap {" . self::NL);
+            fwrite($fd, "class {$tablename}Form {" . self::NL);
 
 
             $columns = $connection->describeColumns($table);

@@ -1,6 +1,6 @@
 <?php
 
-class UserStatusForm extends phalconCSSFormBootstrap {
+class UserStatusForm {
 	private function _Name() {
 		$element = new \Phalcon\Forms\Element\Text("Name");
 		$element->setLabel("Name");

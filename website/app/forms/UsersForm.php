@@ -1,6 +1,6 @@
 <?php
 
-class UsersForm extends phalconCSSFormBootstrap {
+class UsersForm {
 	private function _Firstname() {
 		$element = new \Phalcon\Forms\Element\Text("Firstname");
 		$element->setLabel("Firstname");
