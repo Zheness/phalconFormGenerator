@@ -2,19 +2,23 @@
 
 class IndexController extends ControllerBase
 {
-    const BR = "<br/>";
+    const NL = "\n";
     const TAB = "\t";
 
     public function indexAction()
     {
-        echo "<pre>";
         $connection = new \Phalcon\Db\Adapter\Pdo\Mysql($this->config->database->toArray());
         $tables = $connection->listTables();
         foreach ($tables as $table) {
 
-            // Write class Name
             $tablename = \Phalcon\Text::camelize($table);
-            echo "class {$tablename}Form {" . self::BR;
+        	$fd = fopen("{$this->config->application->formsDir}/{$tablename}.php", "w");
+        	
+        	fwrite($fd, "<?php" . self::NL . self::NL);
+
+            // Begin class
+            fwrite($fd, "class {$tablename}Form extends \\Phalcon\\Forms\\Form {" . self::NL);
+
 
             $columns = $connection->describeColumns($table);
             foreach ($columns as $column) {
@@ -24,44 +28,49 @@ class IndexController extends ControllerBase
                     if ($column->isPrimary())
                         continue;
 
-                    // Write private method Name
+                    // Begin method
                     $columnname = \Phalcon\Text::camelize($column->getName());
-                    echo self::TAB . "private function _{$columnname}() {" . self::BR;
+                    fwrite($fd, self::TAB . "private function _{$columnname}() {" . self::NL);
 
+                    // Write element
                     $columntype_base = $this->_getBaseType($column->getType());
                     $columntype = $this->_getType($columntype_base, $column);
-                    echo self::TAB . self::TAB . "\$element = new \\Phalcon\\Forms\\Element\\{$columntype}(\"{$columnname}\");" . self::BR;
-                    echo self::TAB . self::TAB . "\$element->setLabel(\"{$columnname}\");" . self::BR;
+                    fwrite($fd, self::TAB . self::TAB . "\$element = new \\Phalcon\\Forms\\Element\\{$columntype}(\"{$columnname}\");" . self::NL);
+                    fwrite($fd, self::TAB . self::TAB . "\$element->setLabel(\"{$columnname}\");" . self::NL);
 
                     // Add validator on text fields
                     if ($columntype == "Text" && $column->getSize() > 0) {
-                        echo self::TAB . self::TAB . "\$element->addValidator(new \\Phalcon\\Validation\\Validator\\StringLength([" . self::BR;
-                        echo self::TAB . self::TAB . self::TAB . "\"max\" => {$column->getSize()}" . self::BR;
-                        echo self::TAB . self::TAB . "]);" . self::BR;
+                        fwrite($fd, self::TAB . self::TAB . "\$element->addValidator(new \\Phalcon\\Validation\\Validator\\StringLength([" . self::NL);
+                        fwrite($fd, self::TAB . self::TAB . self::TAB . "\"max\" => {$column->getSize()}" . self::NL);
+                        fwrite($fd, self::TAB . self::TAB . "]));" . self::NL);
                     }
 
                     // End method
-                    echo self::TAB . self::TAB . "return \$element;" . self::BR;
-                    echo self::TAB . "}" . self::BR;
+                    fwrite($fd, self::TAB . self::TAB . "return \$element;" . self::NL);
+                    fwrite($fd, self::TAB . "}" . self::NL);
                 }
             }
 
             // Final method : construction of the form
-            echo self::TAB . "public function setFields() {" . self::BR;
+            fwrite($fd, self::TAB . "public function setFields() {" . self::NL);
             foreach ($columns as $column) {
                 if ($column instanceof \Phalcon\Db\Column) {
                     if ($column->isPrimary())
                         continue;
                     $columnname = \Phalcon\Text::camelize($column->getName());
-                    echo self::TAB . self::TAB . "\$this->add(\$this->_{$columnname}());" . self::BR;
+                    fwrite($fd, self::TAB . self::TAB . "\$this->add(\$this->_{$columnname}());" . self::NL);
                 }
             }
-            echo self::TAB . "}" . self::BR;
+            fwrite($fd, self::TAB . "}" . self::NL);
 
             // End class
-            echo "}" . self::BR . self::BR;
+            fwrite($fd, "}" . self::NL . self::NL);
+
+            fclose($fd);
         }
         $this->view->disable();
+
+        echo "done!";
 
         return FALSE;
     }
