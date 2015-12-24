@@ -83,3 +83,8 @@ $di->setShared('session', function () {
 
     return $session;
 });
+
+/*
+ * Add config in DI
+ */
+$di->setShared('config', $config);
