@@ -1,6 +1,6 @@
 <?php
 
-class phalconCSSFormNone extends \Phalcon\Forms\Form {
+class phalconCSSFormBootstrap extends \Phalcon\Forms\Form {
 
     private $_method = "post";
     private $_enctype = false;
