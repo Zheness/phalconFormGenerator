@@ -48,6 +48,7 @@ class UsersForm extends phalconCSSFormBootstrap {
 	private function _UserStatusId() {
 		$element = new \Phalcon\Forms\Element\Select("UserStatusId");
 		$element->setLabel("UserStatusId");
+		$element->setOptions([]);
 		return $element;
 	}
 	private function _LastDateLogin() {

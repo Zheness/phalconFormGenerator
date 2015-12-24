@@ -13,6 +13,10 @@ class IndexController extends ControllerBase
 
     public function indexAction()
     {
+    }
+
+    public function resetAction()
+    {
         $connection = new \Phalcon\Db\Adapter\Pdo\Mysql($this->config->database->toArray());
         $tables = $connection->listTables();
         foreach ($tables as $table) {
@@ -43,6 +47,11 @@ class IndexController extends ControllerBase
                     $columntype = $this->_getType($columntype_base, $column);
                     fwrite($fd, self::TAB . self::TAB . "\$element = new \\Phalcon\\Forms\\Element\\{$columntype}(\"{$columnname}\");" . self::NL);
                     fwrite($fd, self::TAB . self::TAB . "\$element->setLabel(\"{$columnname}\");" . self::NL);
+
+                    // Add empty selection for select fields
+                    if ($columntype == "Select") {
+                        fwrite($fd, self::TAB . self::TAB . "\$element->setOptions([]);" . self::NL);
+                    }
 
                     // Add validator on text fields
                     if ($columntype == "Text" && $column->getSize() > 0) {
