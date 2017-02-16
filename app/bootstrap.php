@@ -36,13 +36,11 @@ $console = new ConsoleApp($di);
  * Process the console arguments
  */
 $arguments = [];
+$arguments['task'] = count($argv) >= 2 ? ($argv[1] == "help" ? "help" : "main") : "main";
+$arguments['action'] = "main";
 
 foreach ($argv as $k => $arg) {
-    if ($k == 1) {
-        $arguments['task'] = $arg;
-    } elseif ($k == 2) {
-        $arguments['action'] = $arg;
-    } elseif ($k >= 3) {
+    if ($k >= 1) {
         $arguments['params'][] = $arg;
     }
 }
