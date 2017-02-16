@@ -7,7 +7,9 @@ class MainTask extends \Phalcon\Cli\Task
         if (!$this->checkDatabaseConnection()) {
             return 1;
         }
-        $this->checkOutputFolder();
+        if (!$this->checkOutputFolder()) {
+            return 1;
+        }
         echo "Congratulations! You are now flying with Phalcon CLI!";
         return 0;
     }
