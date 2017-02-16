@@ -2,6 +2,8 @@
 
 class MainTask extends \Phalcon\Cli\Task
 {
+    private $outputFolder = BASE_PATH . "/output";
+
     /**
      * entrypoint of the application.
      * Iterate on each table in the database and create the form fields in the output folder.
@@ -17,7 +19,31 @@ class MainTask extends \Phalcon\Cli\Task
         if (!$this->checkOutputFolder()) {
             return 1;
         }
-        echo "Congratulations! You are now flying with Phalcon CLI!";
+
+        echo "Generation started.", PHP_EOL;
+
+        $tables = $this->db->listTables();
+        foreach ($tables as $table) {
+            echo "Processing table `{$table}`... ";
+
+            $table = \Phalcon\Text::camelize($table);
+
+            $this->view->start();
+            $this->view->setVar("class", $table);
+            $this->view->render('main', 'DefaultForm');
+            $this->view->finish();
+
+            if (file_put_contents($this->outputFolder . "/" . $table . "Form.php", $this->view->getContent()) === false) {
+                echo "Impossible to write the file in the output folder.", PHP_EOL;
+                echo "Please check the permissions for `{$this->outputFolder}`.", PHP_EOL;
+                echo "Script aborted.";
+                return 1;
+            }
+            echo "done", PHP_EOL;
+        }
+
+        echo "Generation finished.";
+
         return 0;
     }
 
@@ -43,17 +69,17 @@ class MainTask extends \Phalcon\Cli\Task
      */
     private function checkOutputFolder()
     {
-        if (!file_exists(BASE_PATH . "/output")) {
-            if (!mkdir(BASE_PATH . "/output", 0755)) {
+        if (!file_exists($this->outputFolder)) {
+            if (!mkdir($this->outputFolder, 0755)) {
                 $base_path = BASE_PATH;
-                echo "Folder `./output` cannot be created.", PHP_EOL;
+                echo "Folder `{$this->outputFolder}` cannot be created.", PHP_EOL;
                 echo "Please check the permissions for `{$base_path}`.";
                 return false;
             }
         }
-        if (!is_writable(BASE_PATH . "/output")) {
-            echo "Folder `./output` does not have the write permissions.", PHP_EOL;
-            echo "Please check the permissions for `./output`.";
+        if (!is_writable($this->outputFolder)) {
+            echo "Folder `{$this->outputFolder}` does not have the write permissions.", PHP_EOL;
+            echo "Please check the permissions for `{$this->outputFolder}`.";
             return false;
         }
         return true;
