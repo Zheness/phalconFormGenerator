@@ -3,6 +3,6 @@
 $loader = new \Phalcon\Loader();
 $loader->registerDirs([
     APP_PATH . '/tasks',
-    APP_PATH . '/models'
+    APP_PATH . '/views'
 ]);
 $loader->register();

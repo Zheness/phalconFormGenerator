@@ -28,7 +28,7 @@ class MainTask extends \Phalcon\Cli\Task
     private function checkDatabaseConnection()
     {
         try {
-            $this->db->listTables();
+            $this->db->connect();
         } catch (PDOException $e) {
             echo "An error occured during connection to the database.", PHP_EOL;
             echo "Please check the config in `./app/config/config.php`.";
@@ -57,5 +57,65 @@ class MainTask extends \Phalcon\Cli\Task
             return false;
         }
         return true;
+    }
+
+    /**
+     * Return the Phalcon type (Numeric, Date, Text, ...) according to column type.
+     * @param string $type
+     * @return string
+     */
+    private function getPhalconBaseType($type)
+    {
+        $types = [
+            \Phalcon\Db\Column::TYPE_INTEGER => "Numeric",
+            \Phalcon\Db\Column::TYPE_DATE => "Date",
+            \Phalcon\Db\Column::TYPE_VARCHAR => "Text",
+            \Phalcon\Db\Column::TYPE_DECIMAL => "Numeric",
+            \Phalcon\Db\Column::TYPE_DATETIME => "Text",
+            \Phalcon\Db\Column::TYPE_CHAR => "Text",
+            \Phalcon\Db\Column::TYPE_TEXT => "Textarea",
+            \Phalcon\Db\Column::TYPE_FLOAT => "Numeric",
+            \Phalcon\Db\Column::TYPE_BOOLEAN => "Numeric",
+            \Phalcon\Db\Column::TYPE_DOUBLE => "Numeric",
+            \Phalcon\Db\Column::TYPE_TINYBLOB => "Textarea",
+            \Phalcon\Db\Column::TYPE_BLOB => "Textarea",
+            \Phalcon\Db\Column::TYPE_MEDIUMBLOB => "Textarea",
+            \Phalcon\Db\Column::TYPE_LONGBLOB => "Textarea",
+            \Phalcon\Db\Column::TYPE_BIGINTEGER => "Numeric",
+            \Phalcon\Db\Column::TYPE_JSON => "Textarea",
+            \Phalcon\Db\Column::TYPE_JSONB => "Textarea",
+            \Phalcon\Db\Column::TYPE_TIMESTAMP => "Numeric"
+        ];
+
+        return isset($types[$type]) ? $types[$type] : "Text";
+    }
+
+    /**
+     * Return a better Phalcon type (Check, Select, Password, ...) according to the column.
+     * @param \Phalcon\Db\Column $column
+     * @return string
+     */
+    private function getBestPhalconType($column)
+    {
+        $size = $column->getSize();
+        $columntype = $this->getPhalconBaseType($column->getType());
+
+        if ($columntype == "Numeric") {
+            if ($size == 1) {
+                $columntype = "Check";
+            } else if ($size == 11) {
+                // Could be also a Radio but Select is arbitrary choose here
+                $columntype = "Select";
+            }
+        } else if ($columntype == "Text") {
+            if ($size > 255) {
+                $columntype = "Textarea";
+            }
+            if (preg_match("#(pass|pwd)#i", $column->getName())) {
+                $columntype = "Password";
+            }
+        }
+
+        return $columntype;
     }
 }
