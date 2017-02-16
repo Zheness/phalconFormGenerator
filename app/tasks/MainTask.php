@@ -2,6 +2,13 @@
 
 class MainTask extends \Phalcon\Cli\Task
 {
+    /**
+     * entrypoint of the application.
+     * Iterate on each table in the database and create the form fields in the output folder.
+     * @param string $namespace
+     * @param string $trait
+     * @return int
+     */
     public function mainAction($namespace = 'null', $trait = 'null')
     {
         if (!$this->checkDatabaseConnection()) {
@@ -14,6 +21,10 @@ class MainTask extends \Phalcon\Cli\Task
         return 0;
     }
 
+    /**
+     * Checks the database connection.
+     * @return bool
+     */
     private function checkDatabaseConnection()
     {
         try {
@@ -26,6 +37,10 @@ class MainTask extends \Phalcon\Cli\Task
         return true;
     }
 
+    /**
+     * Checks if the output folder exists (or try to create it) and is writable.
+     * @return bool
+     */
     private function checkOutputFolder()
     {
         if (!file_exists(BASE_PATH . "/output")) {
