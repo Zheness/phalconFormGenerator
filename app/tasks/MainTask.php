@@ -19,8 +19,10 @@ class MainTask extends \Phalcon\Cli\Task
             return 1;
         }
 
-        $namespace = (isset($arguments[0]) && $arguments[0] != 'null') ? $arguments[0] : null;
-        $trait = (isset($arguments[1]) && $arguments[1] != 'null') ? $arguments[1] : null;
+        $namespace = (isset($arguments[0]) && $arguments[0] != 'none') ? $arguments[0] : null;
+        $trait = (isset($arguments[1]) && $arguments[1] != 'none') ? $arguments[1] : null;
+        $extends = '\Phalcon\Forms\Form';
+        $extends = isset($arguments[2]) ? ($arguments[2] == 'null' ? $extends : ($arguments[2] == 'none' ? null : $arguments[2])) : $extends;
 
         echo "Generation started.", PHP_EOL;
 
@@ -34,6 +36,7 @@ class MainTask extends \Phalcon\Cli\Task
             $this->view->setVar("class", $table);
             $this->view->setVar("namespace", $namespace);
             $this->view->setVar("trait", $trait);
+            $this->view->setVar("extends", $extends);
             $this->view->render('main', 'DefaultForm');
             $this->view->finish();
 

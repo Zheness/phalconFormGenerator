@@ -4,7 +4,8 @@
 <?= $namespace != null ? "namespace " . $namespace . ";" : ""; ?>
 
 
-class <?= $class; ?>Form
+class <?= $class; ?>Form <?= $extends != null ? "extends " . $extends : ""; ?>
+
 {
 
     <?= $trait != null ? "use " . $trait . ";" : ""; ?>
