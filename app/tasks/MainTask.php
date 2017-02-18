@@ -30,17 +30,31 @@ class MainTask extends \Phalcon\Cli\Task
         foreach ($tables as $table) {
             echo "Processing table `{$table}`... ";
 
-            $table = \Phalcon\Text::camelize($table);
+            $class = \Phalcon\Text::camelize($table);
+
+            $columns = [];
+            $columnsList = $this->db->describeColumns($table);
+            foreach ($columnsList as $column) {
+                if ($column->isPrimary()) {
+                    continue;
+                }
+                $columns[] = [
+                    "name" => lcfirst(\Phalcon\Text::camelize($column->getName())),
+                    "type" => $this->getBestPhalconType($column),
+                    "size" => $column->getSize()
+                ];
+            }
 
             $this->view->start();
-            $this->view->setVar("class", $table);
+            $this->view->setVar("class", $class);
             $this->view->setVar("namespace", $namespace);
             $this->view->setVar("trait", $trait);
             $this->view->setVar("extends", $extends);
+            $this->view->setVar("columns", $columns);
             $this->view->render('main', 'DefaultForm');
             $this->view->finish();
 
-            if (file_put_contents($this->outputFolder . "/" . $table . "Form.php", $this->view->getContent()) === false) {
+            if (file_put_contents($this->outputFolder . "/" . $class . "Form.php", $this->view->getContent()) === false) {
                 echo "Impossible to write the file in the output folder.", PHP_EOL;
                 echo "Please check the permissions for `{$this->outputFolder}`.", PHP_EOL;
                 echo "Script aborted.";
@@ -125,7 +139,7 @@ class MainTask extends \Phalcon\Cli\Task
 
     /**
      * Return a better Phalcon type (Check, Select, Password, ...) according to the column.
-     * @param \Phalcon\Db\Column $column
+     * @param \Phalcon\Db\ColumnInterface $column
      * @return string
      */
     private function getBestPhalconType($column)
