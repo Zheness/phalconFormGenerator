@@ -7,11 +7,10 @@ class MainTask extends \Phalcon\Cli\Task
     /**
      * entrypoint of the application.
      * Iterate on each table in the database and create the form fields in the output folder.
-     * @param string $namespace
-     * @param string $trait
+     * @param array $arguments
      * @return int
      */
-    public function mainAction($namespace = 'null', $trait = 'null')
+    public function mainAction($arguments = [])
     {
         if (!$this->checkDatabaseConnection()) {
             return 1;
@@ -19,6 +18,9 @@ class MainTask extends \Phalcon\Cli\Task
         if (!$this->checkOutputFolder()) {
             return 1;
         }
+
+        $namespace = (isset($arguments[0]) && $arguments[0] != 'null') ? $arguments[0] : null;
+        $trait = (isset($arguments[1]) && $arguments[1] != 'null') ? $arguments[1] : null;
 
         echo "Generation started.", PHP_EOL;
 
@@ -30,6 +32,8 @@ class MainTask extends \Phalcon\Cli\Task
 
             $this->view->start();
             $this->view->setVar("class", $table);
+            $this->view->setVar("namespace", $namespace);
+            $this->view->setVar("trait", $trait);
             $this->view->render('main', 'DefaultForm');
             $this->view->finish();
 

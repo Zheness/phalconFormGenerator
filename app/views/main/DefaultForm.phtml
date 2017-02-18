@@ -1,8 +1,14 @@
 <?= "<?php"; ?>
 
 
+<?= $namespace != null ? "namespace " . $namespace . ";" : ""; ?>
+
+
 class <?= $class; ?>Form
 {
+
+    <?= $trait != null ? "use " . $trait . ";" : ""; ?>
+
 
 }
 
