@@ -1,42 +1,49 @@
 # phalconFormGenerator
 
-This project is a simple tool created to automatically generate forms for Phalcon Framework.
+VERSION 2.0
 
-Here is the scenario : you imported a database, and you must create all the forms attached to your tables.
+phalconFormGenerator is a simple script used to generate forms according to the columns of a table.
 
-Simply download this repository, configure the database connection, and run the website ! All the forms will be generated.  
-You can now copy the files in your real project.
+Note: this version 2.0 no longer require a web server to run. Simply install the packages and launch the script!
 
-The forms are not perfect, and not all type of field are supported, but its help to generate a lot of fields in one shot.
+## Installation and usage
 
-**[TL;DR]**
+1. Download this repo
+2. Run `composer install` command to install packages
+3. Configure database access in `app/config/config.php`
+4. Start the generation with `./run`
 
-Just open `website/phalconformgenerator.sql` and look the table users.sql
+You can run `./run help` to read the help for the command.
 
-Now look the form generated according to this table in file `website/app/forms/UsersForm.php`
+The files will be generated in the `output` folder.
 
-## Configuration
+## Example:
 
-Download the repository, create or set up the virtual host to run the website.
+You have a table **users** with inside a column **firstname** (of type *VARCHAR* and size *75*);
 
-Edit `website/app/config/config.php` and change the database connection.
+After running the script, this code will be generated:
 
-Start the webserver, and go to the URL `/index/reset` to generate the files.  
-The files are generated under `website/app/forms/` folder.
+```php
+class UsersForm extends \Phalcon\Forms\Form
+{
+    public function setFields()
+    {
+        $this->add($this->firstnameField());
+    }
+    
+    private function firstnameField()
+    {
+        $element = new \Phalcon\Forms\Element\Text("firstname");
+        $element->setLabel("firstname");
+        $element->addValidator(new \Phalcon\Validation\Validator\StringLength([
+            "max" => 75
+        ]));
+        return $element;
+    }
+}
+```
 
-That's it ! You can copy the files into your project.
-
-## Test the render of a form
-
-This part is not mandatory for generation.
-
-The repository use default phalcon-devtool generation, using volt syntax and Bootstrap Framework for CSS.
-
-For testing purpose, another project ([https://github.com/Zheness/phalconCssForm](https://github.com/Zheness/phalconCssForm)) is used here to render a form.
-
-Open the file `website/app/forms/UsersForm.php` and add `extends phalconCSSFormBootstrap` after the class name.
-
-Open the URL `/index/tmp`.
+For another example, the folder `example` contains the structure of a database and the files generated.
 
 ## What's next ?
 
@@ -48,7 +55,6 @@ If you want to contribute, feel free to!
 
 This project was tested with this configuration:
 
-* Apache : 2.4.9
-* PHP : 5.6.13
-* MySQL : 5.6.17
-* Phalcon : 2.0.7
+* PHP : 7.0.12
+* MySQL : 5.7.16
+* Phalcon : 3.0.3
