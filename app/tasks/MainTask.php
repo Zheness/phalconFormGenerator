@@ -19,8 +19,6 @@ class MainTask extends \Phalcon\Cli\Task
             return 1;
         }
 
-        print_r($arguments);
-
         $namespaceName = (isset($arguments[0]) && $arguments[0] != 'none') ? $arguments[0] : null;
         $traitName = (isset($arguments[1]) && $arguments[1] != 'none') ? $arguments[1] : null;
         $extendsName = '\Phalcon\Forms\Form';
