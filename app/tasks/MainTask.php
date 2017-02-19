@@ -19,10 +19,12 @@ class MainTask extends \Phalcon\Cli\Task
             return 1;
         }
 
-        $namespace = (isset($arguments[0]) && $arguments[0] != 'none') ? $arguments[0] : null;
-        $trait = (isset($arguments[1]) && $arguments[1] != 'none') ? $arguments[1] : null;
-        $extends = '\Phalcon\Forms\Form';
-        $extends = isset($arguments[2]) ? ($arguments[2] == 'null' ? $extends : ($arguments[2] == 'none' ? null : $arguments[2])) : $extends;
+        print_r($arguments);
+
+        $namespaceName = (isset($arguments[0]) && $arguments[0] != 'none') ? $arguments[0] : null;
+        $traitName = (isset($arguments[1]) && $arguments[1] != 'none') ? $arguments[1] : null;
+        $extendsName = '\Phalcon\Forms\Form';
+        $extendsName = isset($arguments[2]) ? ($arguments[2] == 'null' ? $extendsName : ($arguments[2] == 'none' ? null : $arguments[2])) : $extendsName;
 
         echo "Generation started.", PHP_EOL;
 
@@ -30,36 +32,55 @@ class MainTask extends \Phalcon\Cli\Task
         foreach ($tables as $table) {
             echo "Processing table `{$table}`... ";
 
-            $class = \Phalcon\Text::camelize($table);
+            $className = \Phalcon\Text::camelize($table);
 
-            $columns = [];
+            $class = new \Nette\PhpGenerator\ClassType($className . "Form");
+            if ($extendsName != null) {
+                $class->setExtends($extendsName);
+            }
+            if ($traitName != null) {
+                $class->addTrait($traitName);
+            }
+
             $columnsList = $this->db->describeColumns($table);
             foreach ($columnsList as $column) {
                 if ($column->isPrimary()) {
                     continue;
                 }
-                $columns[] = [
+                $columnInfo = [
                     "name" => lcfirst(\Phalcon\Text::camelize($column->getName())),
                     "type" => $this->getBestPhalconType($column),
                     "size" => $column->getSize()
                 ];
+                $method = $class->addMethod($columnInfo['name'] . "Field");
+                $method->setVisibility('private');
+                $method->addBody('$element = new \Phalcon\Forms\Element\\' . $columnInfo['type'] . '("' . $columnInfo['name'] . '");');
+                $method->addBody('$element->setLabel("' . $columnInfo['name'] . '");');
+                if ($columnInfo['type'] == 'Select') {
+                    $method->addBody('$element->setOptions([]);');
+                }
+
+                if ($columnInfo['type'] == 'Text' && $columnInfo['size']) {
+                    $method->addBody('$element->addValidator(new \Phalcon\Validation\Validator\StringLength([');
+                    $method->addBody('    "max" => ' . $columnInfo['size']);
+                    $method->addBody(']));');
+                }
+                $method->addBody('return $element;');
             }
 
-            $this->view->start();
-            $this->view->setVar("class", $class);
-            $this->view->setVar("namespace", $namespace);
-            $this->view->setVar("trait", $trait);
-            $this->view->setVar("extends", $extends);
-            $this->view->setVar("columns", $columns);
-            $this->view->render('main', 'DefaultForm');
-            $this->view->finish();
+            $content = "<?php" . PHP_EOL . PHP_EOL;
+            if ($namespaceName != null) {
+                $content .= "namespace " . $namespaceName . ";" . PHP_EOL . PHP_EOL;
+            }
+            $content .= (string)$class;
 
-            if (file_put_contents($this->outputFolder . "/" . $class . "Form.php", $this->view->getContent()) === false) {
+            if (file_put_contents($this->outputFolder . "/" . $className . "Form.php", $content) === false) {
                 echo "Impossible to write the file in the output folder.", PHP_EOL;
                 echo "Please check the permissions for `{$this->outputFolder}`.", PHP_EOL;
                 echo "Script aborted.";
                 return 1;
             }
+
             echo "done", PHP_EOL;
         }
 
