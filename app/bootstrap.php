@@ -28,6 +28,11 @@ $config = $di->getConfig();
 include APP_PATH . '/config/loader.php';
 
 /**
+ * Include composer
+ */
+require BASE_PATH . '/vendor/autoload.php';
+
+/**
  * Create a console application
  */
 $console = new ConsoleApp($di);
