@@ -40,6 +40,8 @@ class MainTask extends \Phalcon\Cli\Task
                 $class->addTrait($traitName);
             }
 
+            $methodSetFields = $class->addMethod("setFields");
+
             $columnsList = $this->db->describeColumns($table);
             foreach ($columnsList as $column) {
                 if ($column->isPrimary()) {
@@ -64,6 +66,7 @@ class MainTask extends \Phalcon\Cli\Task
                     $method->addBody(']));');
                 }
                 $method->addBody('return $element;');
+                $methodSetFields->addBody('$this->add($this->' . $columnInfo['name'] . 'Field());');
             }
 
             $content = "<?php" . PHP_EOL . PHP_EOL;
