@@ -17,7 +17,9 @@ class HelpTask extends \Phalcon\Cli\Task
         echo "Simply run `./run` to generate the files.";
         echo PHP_EOL, PHP_EOL;
         echo "Usage:", PHP_EOL;
-        echo "./run [namespace] [trait]", PHP_EOL;
+        echo "./run [namespace] [trait] [extends]", PHP_EOL, PHP_EOL;
+        echo "Your can replace by `none` options you don't want:", PHP_EOL;
+        echo "./run none none [extends]";
         echo PHP_EOL, PHP_EOL;
         echo "Arguments:", PHP_EOL;
         echo "help", PHP_EOL;

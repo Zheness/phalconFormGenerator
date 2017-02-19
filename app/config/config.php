@@ -9,7 +9,7 @@ return new \Phalcon\Config([
       'dbname'      => 'phalconformgenerator',
       'charset'     => 'utf8',
     ],
-    'version' => '1.0',
+    'version' => '2.0',
 
     /**
      * if true, then we print a new line at the end of each execution
