@@ -40,6 +40,7 @@ $console = new ConsoleApp($di);
 /**
  * Process the console arguments
  */
+$argv = [];
 $arguments = [];
 $arguments['task'] = count($argv) >= 2 ? ($argv[1] == "help" ? "help" : "main") : "main";
 $arguments['action'] = "main";
